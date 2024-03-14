@@ -1,0 +1,16 @@
+[package]
+name = "rl001"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.197", features = ["derive"] }
+rand = "0.8"
+
+[dev-dependencies]
+insta = { version = "1.35.1", features = ["yaml"] }
+rstest = "0.18.2"
+assertor = "0.0.2"
+float_eq = "1.0.1"
