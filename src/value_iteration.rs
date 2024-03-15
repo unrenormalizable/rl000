@@ -1,10 +1,8 @@
 use super::mdp::*;
 
-// TODO: extract MDP trait
-// TODO: Separate out domain terminology between Grid, MDP, algorithms.
-
 pub struct ValueIteration<'a> {
     mdp: &'a dyn MarkovDecisionProcess<'a>,
+    states: Vec<&'a State<'a>>,
     v_init: f32,
     theta: f32,
     values: Vec<f32>,
@@ -13,11 +11,14 @@ pub struct ValueIteration<'a> {
 
 impl<'a> ValueIteration<'a> {
     pub fn new(mdp: &'a dyn MarkovDecisionProcess<'a>, v_init: f32, theta: f32) -> Self {
-        let sn = mdp.get_states().len();
-        let values = vec![v_init; sn];
-        let values_prev = vec![v_init; sn];
+        let mut states = mdp.get_states();
+        states.sort_by(|a, b| a.id.cmp(&b.id));
+
+        let values = vec![v_init; states.len()];
+        let values_prev = vec![v_init; states.len()];
         Self {
             mdp,
+            states,
             v_init,
             theta,
             values,
@@ -25,17 +26,20 @@ impl<'a> ValueIteration<'a> {
         }
     }
 
-    pub fn value_iteration(&mut self, num_iterations: usize) {
+    pub fn value_iteration(&mut self, num_iterations: usize) -> f32 {
         self.values.fill(self.v_init);
         self.values_prev.fill(self.v_init);
+        let mut delta = 0.;
         for _ in 0..num_iterations {
             self.values_prev.copy_from_slice(&self.values);
             self.values.fill(self.v_init);
-            let delta = self.one_value_iteration(self.mdp);
+            delta = self.one_value_iteration(self.mdp);
             if self.theta > delta {
                 break;
             }
         }
+
+        delta
     }
 
     pub fn get_values(&'a self) -> &'a [f32] {
@@ -45,15 +49,14 @@ impl<'a> ValueIteration<'a> {
     fn one_value_iteration(&mut self, mdp: &'a dyn MarkovDecisionProcess<'a>) -> f32 {
         let mut delta = 0.;
 
-        let states = mdp.get_states();
-        for (sn, s) in states.iter().enumerate() {
-            let v_prev = self.values_prev[sn];
-            let v_new = Self::max(&self.expected_utility_for_all_actions(mdp, sn, s))
+        for s in self.states.iter() {
+            let v_prev = self.values_prev[s.id];
+            let v_new = Self::max(&self.expected_utility_for_all_actions(mdp, s))
                 .map(|x| x.1)
                 .unwrap_or_default();
             delta = f32::max(delta, f32::abs(v_prev - v_new));
-            self.values[sn] = v_new;
-        }
+            self.values[s.id] = v_new;
+        };
 
         delta
     }
@@ -61,30 +64,24 @@ impl<'a> ValueIteration<'a> {
     fn expected_utility_for_all_actions(
         &self,
         mdp: &'a dyn MarkovDecisionProcess<'a>,
-        sn: usize,
-        s0: &'a State,
+        s: &'a State,
     ) -> Vec<f32> {
-        mdp.get_actions(s0)
+        mdp.get_actions(s)
             .into_iter()
-            .map(|a| self.expected_utility_for_one_action(mdp, sn, s0, a))
+            .map(|a| self.expected_utility_for_one_action(mdp, s, a))
             .collect()
     }
 
     fn expected_utility_for_one_action(
         &self,
         mdp: &'a dyn MarkovDecisionProcess<'a>,
-        sn: usize,
-        s0: &'a State,
+        s: &'a State,
         a: &'a Action,
     ) -> f32 {
-        let x = mdp.get_transitions(s0, a);
-
-        let y: Vec<f32> = x
+            mdp.get_transitions(s, a)
             .iter()
-            .map(|&(_, p, r)| p * (r + self.mdp.get_gamma() * self.values_prev[sn]))
-            .collect();
-
-        y.iter().sum()
+            .map(|&(s_dst, p, r)| p * (r + self.mdp.get_gamma() * self.values_prev[s_dst.id]))
+            .sum()
     }
 
     fn max(xs: &[f32]) -> Option<(usize, f32)> {
@@ -124,8 +121,9 @@ mod tests {
         let mdp = SimpleGolfEnv::new(0.9);
         let mut vi = ValueIteration::new(&mdp, 0., 0.0001);
 
-        vi.value_iteration(6);
+        let delta = vi.value_iteration(6);
 
+        assert_float_eq!(delta, 0.00239, rmax <= 0.001);
         assert_float_eq!(
             Vec::from(vi.get_values()),
             vec![8.80299, 9.89010, 0.],

@@ -8,7 +8,7 @@ use value_iteration::*;
 fn main() {
     let mdp = SimpleGolfEnv::new(0.9);
     let mut vi = ValueIteration::new(&mdp, 0., 0.0001);
-    vi.value_iteration(1);
+    let delta = vi.value_iteration(1000);
 
-    println!("{:?}", vi.get_values());
+    println!("delta = {delta} => {:?}", vi.get_values());
 }
