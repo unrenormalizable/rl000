@@ -56,7 +56,7 @@ impl<'a> ValueIteration<'a> {
                 .unwrap_or_default();
             delta = f32::max(delta, f32::abs(v_prev - v_new));
             self.values[s.id] = v_new;
-        };
+        }
 
         delta
     }
@@ -78,7 +78,7 @@ impl<'a> ValueIteration<'a> {
         s: &'a State,
         a: &'a Action,
     ) -> f32 {
-            mdp.get_transitions(s, a)
+        mdp.get_transitions(s, a)
             .iter()
             .map(|&(s_dst, p, r)| p * (r + self.mdp.get_gamma() * self.values_prev[s_dst.id]))
             .sum()
