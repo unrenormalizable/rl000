@@ -1,7 +1,7 @@
 # RL000 - Reinforcement Learning - The very basics.
 
 
-[![CDP](https://github.com/unrenormalizable/rl000/actions/workflows/cdp.yml/badge.svg)](https://github.com/unrenormalizable/nanoGPT.rs/actions/workflows/cdp.yml) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg?label=license)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![CDP](https://github.com/unrenormalizable/rl000/actions/workflows/cdp.yml/badge.svg)](https://github.com/unrenormalizable/rl000/actions/workflows/cdp.yml) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg?label=license)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 ## Purpose
 

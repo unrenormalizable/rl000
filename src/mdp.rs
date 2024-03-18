@@ -1,3 +1,4 @@
+use gymnasium::*;
 use std::hash::Hash;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -12,21 +13,13 @@ pub struct Action<'a> {
     pub name: &'a str,
 }
 
-pub type Probability = f32;
-
-pub type Reward = f32;
-
 /// Markov Decision Process - Sutton & Barto 2018.
 pub trait MarkovDecisionProcess<'a> {
-    fn get_states(&'a self) -> Vec<&'a State<'a>>;
+    fn get_n_s(&self) -> usize;
 
-    fn get_actions(&'a self, state: &State) -> Vec<&'a Action<'a>>;
+    fn get_n_a(&self) -> usize;
 
-    fn get_transitions(
-        &'a self,
-        state: &'a State,
-        action: &'a Action,
-    ) -> Vec<(&'a State<'a>, Probability, Reward)>;
+    fn get_transitions(&'a self) -> &'a Transitions;
 
     fn get_gamma(&self) -> f32;
 }
