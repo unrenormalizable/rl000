@@ -1,4 +1,6 @@
+use super::math;
 use super::mdp::*;
+use super::mdp_solver::*;
 use gymnasium::*;
 
 pub struct ValueIteration<'a> {
@@ -12,8 +14,23 @@ pub struct ValueIteration<'a> {
     values_prev: Vec<f32>,
 }
 
+impl<'a> MdpSolver for ValueIteration<'a> {
+    fn v_star(&self, state: usize) -> f32 {
+        self.values[state]
+    }
+
+    fn q_star(&self, s: usize, a: usize) -> Option<f32> {
+        self.q(&self.values, s, a)
+    }
+
+    fn pi_star(&self, state: usize) -> Option<usize> {
+        let max = self.q_for_all_actions(&self.values, state);
+        max.1.map_or_else(|| None, |_| Some(max.0))
+    }
+}
+
 impl<'a> ValueIteration<'a> {
-    pub fn new(mdp: &'a dyn MarkovDecisionProcess<'a>, v_init: f32, theta: f32) -> Self {
+    pub fn new(mdp: &'a dyn Mdp<'a>, v_init: f32, theta: f32) -> Self {
         let n_s = mdp.get_n_s();
         let n_a = mdp.get_n_a();
         let transitions = mdp.get_transitions();
@@ -47,10 +64,11 @@ impl<'a> ValueIteration<'a> {
             }
         }
 
+        self.values_prev.fill(self.v_init);
         (delta, iter_done)
     }
 
-    pub fn get_values(&'a self) -> &'a [f32] {
+    pub fn values(&'a self) -> &'a [f32] {
         &self.values
     }
 
@@ -58,8 +76,9 @@ impl<'a> ValueIteration<'a> {
         let mut delta = 0.;
 
         for s in 0..self.n_s {
-            let v_new = Self::max(&self.expected_utility_for_all_actions(s))
-                .map(|x| x.1)
+            let v_new = self
+                .q_for_all_actions(&self.values_prev, s)
+                .1
                 .unwrap_or_default();
             delta = f32::max(delta, f32::abs(self.values_prev[s] - v_new));
             self.values[s] = v_new;
@@ -68,31 +87,22 @@ impl<'a> ValueIteration<'a> {
         delta
     }
 
-    fn expected_utility_for_all_actions(&self, s: usize) -> Vec<f32> {
-        (0..self.n_a)
-            .map(|a| self.expected_utility_for_one_action(s, a))
-            .collect()
+    fn q_for_all_actions(&self, v: &Vec<f32>, s: usize) -> (usize, Option<f32>) {
+        let qs: Vec<_> = (0..self.n_a).map(|a| self.q(v, s, a)).collect();
+
+        math::max(&qs)
     }
 
-    fn expected_utility_for_one_action(&self, s: usize, a: usize) -> f32 {
+    fn q(&self, v: &Vec<f32>, s: usize, a: usize) -> Option<f32> {
         if let Some(ts) = self.transitions.get(&(s, a)) {
-            ts.iter()
-                .map(|t| t.probability * (t.reward + self.gamma * self.values_prev[t.next_state]))
-                .sum()
+            let q = ts
+                .iter()
+                .map(|t| t.probability * (t.reward + self.gamma * v[t.next_state]))
+                .sum();
+            Some(q)
         } else {
-            0.
+            None
         }
-    }
-
-    fn max(xs: &[f32]) -> Option<(usize, f32)> {
-        let ret = xs
-            .iter()
-            .rev()
-            .enumerate()
-            .max_by(|(_, a), (_, b)| a.total_cmp(b));
-
-        // TODO: Add tests.
-        ret.map(|x| (xs.len() - 1 - x.0, *x.1))
     }
 }
 
@@ -109,11 +119,7 @@ mod tests {
 
         vi.value_iteration(1);
 
-        assert_float_eq!(
-            Vec::from(vi.get_values()),
-            vec![0., 9., 0.],
-            rmax_all <= 0.001
-        );
+        assert_float_eq!(Vec::from(vi.values()), vec![0., 9., 0.], rmax_all <= 0.001);
     }
 
     #[test]
@@ -121,13 +127,28 @@ mod tests {
         let mdp = SimpleGolfMdp::new(0.9);
         let mut vi = ValueIteration::new(&mdp, 0., 0.0001);
 
-        let (delta, _) = vi.value_iteration(6);
+        let (delta, iterations) = vi.value_iteration(6);
 
+        assert_eq!(iterations, 6);
         assert_float_eq!(delta, 0.00239, rmax <= 0.001);
         assert_float_eq!(
-            Vec::from(vi.get_values()),
+            Vec::from(vi.values()),
             vec![8.80299, 9.89010, 0.],
             rmax_all <= 0.0001
         );
     }
+
+    #[test]
+    fn test_policy() {
+        let mdp = SimpleGolfMdp::new(0.9);
+        let mut vi = ValueIteration::new(&mdp, 0., 0.0001);
+
+        vi.value_iteration(6);
+
+        assert_eq!(vi.pi_star(0), Some(0));
+        assert_eq!(vi.pi_star(1), Some(2));
+        assert_eq!(vi.pi_star(2), None);
+    }
+
+    // check for q_star
 }

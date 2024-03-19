@@ -21,7 +21,7 @@ impl<'a> GymMdpAdapter<'a> {
     }
 }
 
-impl<'a> MarkovDecisionProcess<'a> for GymMdpAdapter<'a> {
+impl<'a> Mdp<'a> for GymMdpAdapter<'a> {
     fn get_n_s(&self) -> usize {
         if let Space::Discrete { n } = self.env.get_observation_space() {
             *n

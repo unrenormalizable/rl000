@@ -74,7 +74,7 @@ impl SimpleGolfMdp {
     }
 }
 
-impl<'a> MarkovDecisionProcess<'a> for SimpleGolfMdp {
+impl<'a> Mdp<'a> for SimpleGolfMdp {
     fn get_n_s(&self) -> usize {
         self.n_s
     }
