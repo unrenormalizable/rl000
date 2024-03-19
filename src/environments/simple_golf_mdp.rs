@@ -1,4 +1,4 @@
-use super::mdp::*;
+use crate::Mdp;
 use gymnasium::*;
 
 /// https://towardsdatascience.com/reinforcement-learning-an-easy-introduction-to-value-iteration-e4cfe0731fd5
@@ -75,19 +75,19 @@ impl SimpleGolfMdp {
 }
 
 impl<'a> Mdp<'a> for SimpleGolfMdp {
-    fn get_n_s(&self) -> usize {
+    fn n_s(&self) -> usize {
         self.n_s
     }
 
-    fn get_n_a(&self) -> usize {
+    fn n_a(&self) -> usize {
         self.n_a
     }
 
-    fn get_transitions(&'a self) -> &'a Transitions {
+    fn transitions(&'a self) -> &'a Transitions {
         &self.transitions
     }
 
-    fn get_gamma(&self) -> f32 {
+    fn gamma(&self) -> f32 {
         self.gamma
     }
 }

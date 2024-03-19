@@ -1,6 +1,6 @@
-use super::math;
 use super::mdp::*;
 use super::mdp_solver::*;
+use crate::math;
 use gymnasium::*;
 
 pub struct ValueIteration<'a> {
@@ -31,10 +31,10 @@ impl<'a> MdpSolver for ValueIteration<'a> {
 
 impl<'a> ValueIteration<'a> {
     pub fn new(mdp: &'a dyn Mdp<'a>, v_init: f32, theta: f32) -> Self {
-        let n_s = mdp.get_n_s();
-        let n_a = mdp.get_n_a();
-        let transitions = mdp.get_transitions();
-        let gamma = mdp.get_gamma();
+        let n_s = mdp.n_s();
+        let n_a = mdp.n_a();
+        let transitions = mdp.transitions();
+        let gamma = mdp.gamma();
         let values = vec![v_init; n_s];
         let values_prev = vec![v_init; n_s];
         Self {
@@ -87,13 +87,13 @@ impl<'a> ValueIteration<'a> {
         delta
     }
 
-    fn q_for_all_actions(&self, v: &Vec<f32>, s: usize) -> (usize, Option<f32>) {
+    fn q_for_all_actions(&self, v: &[f32], s: usize) -> (usize, Option<f32>) {
         let qs: Vec<_> = (0..self.n_a).map(|a| self.q(v, s, a)).collect();
 
         math::max(&qs)
     }
 
-    fn q(&self, v: &Vec<f32>, s: usize, a: usize) -> Option<f32> {
+    fn q(&self, v: &[f32], s: usize, a: usize) -> Option<f32> {
         if let Some(ts) = self.transitions.get(&(s, a)) {
             let q = ts
                 .iter()
@@ -109,7 +109,7 @@ impl<'a> ValueIteration<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::simple_golf_mdp::*;
+    use crate::environments::simple_golf_mdp::*;
     use float_eq::assert_float_eq;
 
     #[test]
