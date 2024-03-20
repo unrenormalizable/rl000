@@ -25,6 +25,7 @@ Additional classes of algorithms not covered in the above
 
 ## References
 
+- [Theory: Reinforcement Learning: An Introduction by Sutton & Barto](https://lcalem.github.io/blog/2018/09/22/sutton-index)
 - [Theory: Reinforcement Learning by Steve Brunton](https://www.youtube.com/watch?v=0MNVhXEX9to&list=PLMrJAkhIeNNQe1JXNvaFvURxGY4gE9k74)
 - [Theory: CIS 522 - Deep Learning - Reinforcement Learning](https://www.youtube.com/watch?v=oJo0jb_h2sM&list=PLYgyoWurxA_8ePNUuTLDtMvzyf-YW7im2)
 - [Code: Deep Reinforcement Learning With Python](https://github.com/sudharsan13296/Deep-Reinforcement-Learning-With-Python)

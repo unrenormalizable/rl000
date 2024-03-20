@@ -1,3 +1,4 @@
+/// For compatibility with python max.
 pub fn max(xs: &[Option<f32>]) -> (usize, Option<f32>) {
     let ret = xs.iter().rev().enumerate().max_by(|&a, &b| match (a, b) {
         ((_, Some(a)), (_, Some(b))) => a.total_cmp(b),

@@ -1,2 +1,3 @@
-pub mod gym_mdp_adapter;
-pub mod simple_golf_mdp;
+pub mod frozen_lake;
+pub mod gym_adapter;
+pub mod simple_golf;

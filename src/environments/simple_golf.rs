@@ -2,14 +2,14 @@ use crate::Mdp;
 use gymnasium::*;
 
 /// https://towardsdatascience.com/reinforcement-learning-an-easy-introduction-to-value-iteration-e4cfe0731fd5
-pub struct SimpleGolfMdp {
+pub struct SimpleGolf {
     gamma: f32,
     n_s: usize,
     n_a: usize,
     transitions: Transitions,
 }
 
-impl SimpleGolfMdp {
+impl SimpleGolf {
     pub fn new(gamma: f32) -> Self {
         let transitions = Transitions::from([
             (
@@ -74,7 +74,7 @@ impl SimpleGolfMdp {
     }
 }
 
-impl<'a> Mdp<'a> for SimpleGolfMdp {
+impl<'a> Mdp<'a> for SimpleGolf {
     fn n_s(&self) -> usize {
         self.n_s
     }
