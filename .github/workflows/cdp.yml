@@ -67,13 +67,11 @@ jobs:
       - name: Run cargo fmt
         continue-on-error: false
         run: |
-          cd binding-rust
           cargo fmt --all -- --check
 
       - name: Run cargo clippy
         continue-on-error: false
         run: |
-          cd binding-rust
           cargo clippy --all-targets --all-features -- -D warnings
 
   finish:
