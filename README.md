@@ -15,6 +15,7 @@
 
 ## Overview
 
+> Image from [Theory: Reinforcement Learning by Steve Brunton](https://www.youtube.com/watch?v=0MNVhXEX9to&list=PLMrJAkhIeNNQe1JXNvaFvURxGY4gE9k74)
 ![image](https://github.com/unrenormalizable/gymnasium-http-api/assets/152241361/932a7306-2020-4f91-b9d1-de91c352e956)
 
 Additional classes of algorithms not covered in the above
