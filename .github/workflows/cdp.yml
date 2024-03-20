@@ -78,7 +78,7 @@ jobs:
 
   finish:
     name: Finish
-    needs: [build-test, lints]
+    needs: [build-test, lint-rust]
     runs-on: ubuntu-latest
     steps:
       - run: echo "Done..."
