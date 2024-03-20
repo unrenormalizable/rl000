@@ -8,6 +8,8 @@ use gymnasium::*;
 use mdps::mdp::*;
 use mdps::mdp_solver::*;
 use mdps::value_iteration::*;
+use serde_json::{to_value, Value};
+use std::collections::HashMap;
 
 fn main() {
     let mdp = &SimpleGolfMdp::new(0.9) as &dyn Mdp;
@@ -16,11 +18,21 @@ fn main() {
     println!("delta = {delta:?} => {:?}", vi.values());
 
     let gc = GymClient::new("http://localhost", 5000);
-    let env = gc.make_env("FrozenLake-v1", Some("ansi")).unwrap();
+
+    let kwargs = HashMap::<&str, Value>::from([
+        ("render_mode", to_value("ansi").unwrap()),
+        ("map_name", to_value("8x8").unwrap()),
+        ("is_slippery", to_value(true).unwrap()),
+        ("desc", to_value(&["SHHH", "FHHH", "FHHF", "FFFG"]).unwrap()),
+    ]);
+    let env = gc
+        .make_env("FrozenLake-v1", Some(100), Some(false), Some(true), kwargs)
+        .unwrap();
     let mdp = &GymMdpAdapter::new(&env, 0.9) as &dyn Mdp;
-    let mut vi = ValueIteration::new(mdp, 0., 0.0001);
+    let theta = 1e-4;
+    let mut vi = ValueIteration::new(mdp, 0., theta);
     let delta = vi.value_iteration(1000);
-    println!("delta = {delta:?} => {:?}", vi.values());
+    println!("delta = {theta:?} -> {delta:?} => {:?}", vi.values());
 
     let mdp_solver = &vi as &dyn MdpSolver;
 

@@ -320,7 +320,7 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 [[package]]
 name = "gymnasium"
 version = "0.1.0"
-source = "git+https://github.com/unrenormalizable/gymnasium-http-api.git?branch=master#4995a045d03011075cd244f8266f98991db30d7b"
+source = "git+https://github.com/unrenormalizable/gymnasium-http-api.git?branch=master#19a2491e4f22a07b1078e47b68863b3868ed16cd"
 dependencies = [
  "rand",
  "reqwest",
