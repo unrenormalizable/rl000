@@ -23,7 +23,7 @@ fn main() {
         ("render_mode", to_value("ansi").unwrap()),
         ("map_name", to_value("8x8").unwrap()),
         ("is_slippery", to_value(true).unwrap()),
-        ("desc", to_value(&["SHHH", "FHHH", "FHHF", "FFFG"]).unwrap()),
+        ("desc", to_value(["SHHH", "FHHH", "FHHF", "FFFG"]).unwrap()),
     ]);
     let env = gc
         .make_env("FrozenLake-v1", Some(100), Some(false), Some(true), kwargs)
