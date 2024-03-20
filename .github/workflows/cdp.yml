@@ -11,9 +11,14 @@ on:
     branches: [master]
 
 jobs:
-  build-test-deploy-linux:
-    name: Build, test & deploy (linux)
-    runs-on: ubuntu-latest
+  build-test:
+    name: Build & test
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -24,54 +29,29 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          target: x86_64-unknown-linux-gnu
 
       - name: Run cargo build
         uses: actions-rs/cargo@v1
         continue-on-error: false
         with:
           command: build
-          args: --release --target x86_64-unknown-linux-gnu
+          args: --release
 
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         continue-on-error: false
         with:
           command: test
-          args: --release --target x86_64-unknown-linux-gnu
-
-  build-test-deploy-windows:
-    name: Build, test & deploy (windows)
-    runs-on: windows-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          target: i686-pc-windows-msvc
-
-      - name: Run cargo build
-        uses: actions-rs/cargo@v1
-        continue-on-error: false
-        with:
-          command: build
-          args: --release --target i686-pc-windows-msvc
-
-      - name: Run cargo test
-        uses: actions-rs/cargo@v1
-        continue-on-error: false
-        with:
-          command: test
-          args: --release --target i686-pc-windows-msvc
-
-  lints:
-    name: Lints
-    runs-on: ubuntu-latest
+          args: --release
+  
+  lint-rust:
+    name: Lint rust
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -85,22 +65,20 @@ jobs:
           components: rustfmt, clippy
 
       - name: Run cargo fmt
-        uses: actions-rs/cargo@v1
         continue-on-error: false
-        with:
-          command: fmt
-          args: --all -- --check
+        run: |
+          cd binding-rust
+          cargo fmt --all -- --check
 
       - name: Run cargo clippy
-        uses: actions-rs/cargo@v1
         continue-on-error: false
-        with:
-          command: clippy
-          args: --all-targets --all-features -- -D warnings
+        run: |
+          cd binding-rust
+          cargo clippy --all-targets --all-features -- -D warnings
 
   finish:
     name: Finish
-    needs: [build-test-deploy-linux, build-test-deploy-windows, lints]
+    needs: [build-test, lints]
     runs-on: ubuntu-latest
     steps:
       - run: echo "Done..."
