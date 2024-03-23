@@ -318,9 +318,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
-name = "gymnasium"
+name = "gymnasium_rust_client"
 version = "0.1.0"
-source = "git+https://github.com/unrenormalizable/gymnasium-http-api.git?branch=master#19a2491e4f22a07b1078e47b68863b3868ed16cd"
+source = "git+https://github.com/unrenormalizable/gymnasium-http-api.git?branch=master#de27ab92a159b3adbca9db5e95150d9bd805fad6"
 dependencies = [
  "rand",
  "reqwest",
@@ -786,7 +786,7 @@ version = "0.1.0"
 dependencies = [
  "assertor",
  "float_eq",
- "gymnasium",
+ "gymnasium_rust_client",
  "insta",
  "rand",
  "reqwest",

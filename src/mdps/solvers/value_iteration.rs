@@ -1,7 +1,7 @@
 use super::common;
 use crate::mdps::mdp::*;
 use crate::mdps::mdp_solver::*;
-use gymnasium::*;
+use gymnasium_rust_client::*;
 
 /// https://lcalem.github.io/blog/2018/09/24/sutton-chap04-dp#44-value-iteration
 pub struct ValueIteration<'a> {
@@ -15,18 +15,18 @@ pub struct ValueIteration<'a> {
 }
 
 impl<'a> MdpSolver<f32> for ValueIteration<'a> {
-    fn v_star(&self, state: usize) -> f32 {
-        self.values[state]
+    fn v_star(&self, s: Discrete) -> f32 {
+        self.values[s as usize]
     }
 
-    fn q_star(&self, s: usize, a: usize) -> Option<f32> {
+    fn q_star(&self, s: Discrete, a: Discrete) -> Option<f32> {
         common::q(self.transitions, self.gamma, &self.values, s, a)
     }
 
-    fn pi_star(&self, state: usize) -> Option<usize> {
+    fn pi_star(&self, s: Discrete) -> Option<Discrete> {
         let max =
-            common::q_for_all_actions(self.transitions, self.n_a, self.gamma, &self.values, state);
-        max.1.map_or_else(|| None, |_| Some(max.0))
+            common::q_for_all_actions(self.transitions, self.n_a, self.gamma, &self.values, s);
+        max.1.map_or_else(|| None, |_| Some(max.0 as Discrete))
     }
 
     fn exec(&mut self, theta: f32, num_iterations: Option<usize>) -> (f32, usize) {
@@ -49,6 +49,7 @@ impl<'a> MdpSolver<f32> for ValueIteration<'a> {
     }
 }
 
+#[allow(dead_code)]
 impl<'a> ValueIteration<'a> {
     pub fn new(mdp: &'a dyn Mdp<'a>, v_init: f32) -> Self {
         let n_s = mdp.n_s();
@@ -77,7 +78,7 @@ impl<'a> ValueIteration<'a> {
                 self.n_a,
                 self.gamma,
                 &self.values_prev,
-                s,
+                s as Discrete,
             )
             .1
             .unwrap_or_default();
@@ -101,7 +102,9 @@ mod tests {
         let mut vi = ValueIteration::new(&mdp, 0.);
 
         let (_, num_iter) = vi.exec(1e-5, Some(1));
-        let values = (0..vi.n_s).map(|s| vi.v_star(s)).collect::<Vec<_>>();
+        let values = (0..vi.n_s)
+            .map(|s| vi.v_star(s as Discrete))
+            .collect::<Vec<_>>();
 
         assert_eq!(num_iter, 1);
         assert_float_eq!(values, vec![0., 9., 0.], rmax_all <= 0.001);
@@ -113,7 +116,9 @@ mod tests {
         let mut vi = ValueIteration::new(&mdp, 0.);
 
         let (delta, iterations) = vi.exec(1e-4, Some(6));
-        let values = (0..vi.n_s).map(|s| vi.v_star(s)).collect::<Vec<_>>();
+        let values = (0..vi.n_s)
+            .map(|s| vi.v_star(s as Discrete))
+            .collect::<Vec<_>>();
 
         assert_eq!(iterations, 6);
         assert_float_eq!(delta, 0.00239, rmax <= 0.001);
@@ -138,12 +143,16 @@ mod tests {
         let mut v = ValueIteration::new(&mdp, 0.);
 
         let (delta, iterations) = v.exec(1e-8, Some(100));
-        let v_stars = (0..v.n_s).map(|s| v.v_star(s)).collect::<Vec<_>>();
-        let pi_stars = (0..v.n_s).map(|s| v.pi_star(s)).collect::<Vec<_>>();
+        let v_stars = (0..v.n_s)
+            .map(|s| v.v_star(s as Discrete))
+            .collect::<Vec<_>>();
+        let pi_stars = (0..v.n_s)
+            .map(|s| v.pi_star(s as Discrete))
+            .collect::<Vec<_>>();
         let mut q_stars = vec![];
         for s in 0..v.n_s {
             for a in 0..v.n_a {
-                q_stars.push(v.q_star(s, a));
+                q_stars.push(v.q_star(s as Discrete, a as Discrete));
             }
         }
 

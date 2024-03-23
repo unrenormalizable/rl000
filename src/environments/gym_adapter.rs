@@ -1,5 +1,5 @@
 use crate::Mdp;
-use gymnasium::*;
+use gymnasium_rust_client::*;
 
 pub struct GymAdapter<'a> {
     name: String,
@@ -10,7 +10,7 @@ pub struct GymAdapter<'a> {
 
 impl<'a> GymAdapter<'a> {
     pub fn new(env: &'a Environment, gamma: f32) -> Self {
-        let transitions = env.transitions().unwrap();
+        let transitions = env.transitions();
 
         Self {
             name: env.name().to_string(),
@@ -24,7 +24,7 @@ impl<'a> GymAdapter<'a> {
 impl<'a> Mdp<'a> for GymAdapter<'a> {
     fn n_s(&self) -> usize {
         if let ObsActSpace::Discrete { n } = self.env.observation_space() {
-            *n
+            *n as usize
         } else {
             panic!("'{}' is not an MDP.", self.name)
         }
@@ -32,7 +32,7 @@ impl<'a> Mdp<'a> for GymAdapter<'a> {
 
     fn n_a(&self) -> usize {
         if let ObsActSpace::Discrete { n } = self.env.action_space() {
-            *n
+            *n as usize
         } else {
             panic!("'{}' is not an MDP.", self.name)
         }

@@ -1,5 +1,5 @@
 use crate::Mdp;
-use gymnasium::*;
+use gymnasium_rust_client::*;
 
 /// Gymnasium FrozenLake, default map.
 pub struct FrozenLake {
@@ -9,6 +9,7 @@ pub struct FrozenLake {
     transitions: Transitions,
 }
 
+#[allow(dead_code)]
 impl FrozenLake {
     pub fn new(gamma: f32) -> Self {
         let transitions = Transitions::from([

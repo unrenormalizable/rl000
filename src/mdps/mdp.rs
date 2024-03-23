@@ -1,4 +1,4 @@
-use gymnasium::*;
+use gymnasium_rust_client::*;
 
 /// Markov Decision Process - Sutton & Barto 2018.
 pub trait Mdp<'a> {

@@ -1,5 +1,5 @@
 use crate::Mdp;
-use gymnasium::*;
+use gymnasium_rust_client::*;
 
 /// https://towardsdatascience.com/reinforcement-learning-an-easy-introduction-to-value-iteration-e4cfe0731fd5
 pub struct SimpleGolf {
@@ -9,6 +9,7 @@ pub struct SimpleGolf {
     transitions: Transitions,
 }
 
+#[allow(dead_code)]
 impl SimpleGolf {
     pub fn new(gamma: f32) -> Self {
         let transitions = Transitions::from([

@@ -7,7 +7,7 @@
 ## Purpose
 
 - [x] Value iteration
-- [ ] Policy iteration
+- [x] Policy iteration
 - [ ] TD(0)
 - [ ] TD(inf) = MC
 - [ ] Q-learning

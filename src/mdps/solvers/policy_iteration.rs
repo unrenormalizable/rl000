@@ -1,7 +1,7 @@
 use super::common;
 use crate::mdps::mdp::*;
 use crate::mdps::mdp_solver::*;
-use gymnasium::*;
+use gymnasium_rust_client::*;
 
 // TODO: way to output mini visualizations.
 
@@ -13,20 +13,20 @@ pub struct PolicyIteration<'a> {
     gamma: f32,
     v_init: f32,
     values: Vec<f32>,
-    policies: Vec<usize>,
+    policies: Vec<Discrete>,
 }
 
 impl<'a> MdpSolver<bool> for PolicyIteration<'a> {
-    fn v_star(&self, state: usize) -> f32 {
-        self.values[state]
+    fn v_star(&self, s: Discrete) -> f32 {
+        self.values[s as usize]
     }
 
-    fn q_star(&self, s: usize, a: usize) -> Option<f32> {
+    fn q_star(&self, s: Discrete, a: Discrete) -> Option<f32> {
         common::q(self.transitions, self.gamma, &self.values, s, a)
     }
 
-    fn pi_star(&self, state: usize) -> Option<usize> {
-        Some(self.policies[state])
+    fn pi_star(&self, s: Discrete) -> Option<Discrete> {
+        Some(self.policies[s as usize])
     }
 
     fn exec(&mut self, theta: f32, num_iterations: Option<usize>) -> (bool, usize) {
@@ -47,8 +47,9 @@ impl<'a> MdpSolver<bool> for PolicyIteration<'a> {
     }
 }
 
+#[allow(dead_code)]
 impl<'a> PolicyIteration<'a> {
-    pub fn new(mdp: &'a dyn Mdp<'a>, v_init: f32, a_init: usize) -> Self {
+    pub fn new(mdp: &'a dyn Mdp<'a>, v_init: f32, a_init: Discrete) -> Self {
         let n_s = mdp.n_s();
         let n_a = mdp.n_a();
         let transitions = mdp.transitions();
@@ -79,9 +80,14 @@ impl<'a> PolicyIteration<'a> {
         let mut policy_stable = true;
         for s in 0..self.n_s {
             let b = self.policies[s];
-            self.policies[s] =
-                common::q_for_all_actions(self.transitions, self.n_a, self.gamma, &self.values, s)
-                    .0;
+            self.policies[s] = common::q_for_all_actions(
+                self.transitions,
+                self.n_a,
+                self.gamma,
+                &self.values,
+                s as Discrete,
+            )
+            .0 as Discrete;
             if b != self.policies[s] {
                 policy_stable = false;
             }
@@ -99,7 +105,7 @@ impl<'a> PolicyIteration<'a> {
                 self.transitions,
                 self.gamma,
                 &self.values,
-                s,
+                s as Discrete,
                 self.policies[s],
             )
             .unwrap_or_default();
@@ -122,7 +128,9 @@ mod tests {
         let mut p = PolicyIteration::new(&mdp, 0., 0);
 
         let (policy_stable, num_iter) = p.exec(1e-5, Some(1));
-        let values = (0..p.n_s).map(|s| p.v_star(s)).collect::<Vec<_>>();
+        let values = (0..p.n_s)
+            .map(|s| p.v_star(s as Discrete))
+            .collect::<Vec<_>>();
 
         assert!(!policy_stable);
         assert_eq!(num_iter, 1);
@@ -135,7 +143,9 @@ mod tests {
         let mut p = PolicyIteration::new(&mdp, 0., 0);
 
         let (policy_stable, num_iter) = p.exec(1e-5, None);
-        let values = (0..p.n_s).map(|s| p.v_star(s)).collect::<Vec<_>>();
+        let values = (0..p.n_s)
+            .map(|s| p.v_star(s as Discrete))
+            .collect::<Vec<_>>();
 
         assert!(policy_stable);
         assert_eq!(num_iter, 2);
@@ -148,12 +158,16 @@ mod tests {
         let mut p = PolicyIteration::new(&mdp, 0., 0);
 
         let (policy_stable, iterations) = p.exec(1e-8, Some(10));
-        let v_stars = (0..p.n_s).map(|s| p.v_star(s)).collect::<Vec<_>>();
-        let pi_stars = (0..p.n_s).map(|s| p.pi_star(s)).collect::<Vec<_>>();
+        let v_stars = (0..p.n_s)
+            .map(|s| p.v_star(s as Discrete))
+            .collect::<Vec<_>>();
+        let pi_stars = (0..p.n_s)
+            .map(|s| p.pi_star(s as Discrete))
+            .collect::<Vec<_>>();
         let mut q_stars = vec![];
         for s in 0..p.n_s {
             for a in 0..p.n_a {
-                q_stars.push(p.q_star(s, a));
+                q_stars.push(p.q_star(s as Discrete, a as Discrete));
             }
         }
 
